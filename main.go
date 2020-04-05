@@ -106,7 +106,7 @@ func initialize() {
 
 	//generates the times in which the nodes end the computation of the map tasks
 	for i := 0; i < nNodes; i++ {
-		timeOfCompletion[i] = systemClock + rand.ExpFloat64()/rate
+		timeOfCompletion[i] = rand.ExpFloat64() / rate
 	}
 
 }
@@ -137,20 +137,23 @@ func main() {
 		var servingNode int
 		var nextTime float64
 		for i := range timeOfCompletion {
-			_ = servingNode
 			if nextTime == 0 || timeOfCompletion[i] < nextTime {
-				timeOfCompletion[i] = nextTime
+				nextTime = timeOfCompletion[i]
 				servingNode = i
 			}
 		}
 
 		//advance system clock
-		systemClock = nextTime
+		systemClock = systemClock + nextTime
+
+		for i := range timeOfCompletion {
+			timeOfCompletion[i] = timeOfCompletion[i] - nextTime
+		}
 
 		//remove task from the service Q and adds it to the join Q
 		task := nodes[servingNode].serviceTasksQ[0]
 		nodes[servingNode].serviceTasksQ = nodes[servingNode].serviceTasksQ[1:]
-		nodes[servingNode].joinTasksQ = append(nodes[servingNode].serviceTasksQ, task)
+		nodes[servingNode].joinTasksQ = append(nodes[servingNode].joinTasksQ, task)
 
 		if len(inputSplits) == 0 {
 			job := Job{jobSplitted, 10}
@@ -162,7 +165,7 @@ func main() {
 		if len(nodes[servingNode].serviceTasksQ) == 0 {
 			timeOfCompletion[servingNode] = 0
 		} else {
-			timeOfCompletion[servingNode] = systemClock + rand.ExpFloat64()/rate
+			timeOfCompletion[servingNode] = rand.ExpFloat64() / rate
 		}
 
 	}
