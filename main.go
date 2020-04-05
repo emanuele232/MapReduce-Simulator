@@ -12,14 +12,14 @@ const lenQ = 2
 var nodes []Node
 var jobServed = 0
 var nInputSliced = 0
-var systemClock = 0
-var lastJobSplitted = 0
+var systemClock = 0.0
+var jobSplitted = 0
 var inputSplits []string //when a job is splitted this array is populated
 var rate = 1.00
 
 /*
-timeOfCompletion stores the time needed for a node to complete
-its map task (position in array = id node)
+	timeOfCompletion stores the time needed for a node to complete
+	its map task (position in array = id node)
 */
 var timeOfCompletion [nNodes]float64
 
@@ -41,12 +41,13 @@ func splitJob(job Job) []string {
 		//generates an unique id for the task (idJob_nTask)
 		a = append(a, fmt.Sprint(job.id, "_", i))
 	}
+	jobSplitted++
 	return a
 }
 
 /*
-sendTasksToQueue populate the queues of the nodes until there are no
-tasks available at the moment or the queues are full
+	sendTasksToQueue populate the queues of the nodes until there are no
+	tasks available at the moment or the queues are full
 */
 func sendTasksToQueues() {
 	var nodeID = 0
@@ -100,12 +101,12 @@ func initialize() {
 			joinTasksQ:    make([]string, 0)})
 	}
 	//create and split the first job
-	job := Job{lastJobSplitted, 10}
+	job := Job{jobSplitted, 10}
 	inputSplits = splitJob(job)
 
 	//generates the times in which the nodes end the computation of the map tasks
 	for i := 0; i < nNodes; i++ {
-		timeOfCompletion[i] = rand.ExpFloat64() / rate
+		timeOfCompletion[i] = systemClock + rand.ExpFloat64()/rate
 	}
 
 }
@@ -128,10 +129,42 @@ func main() {
 	fmt.Println(inputSplits)
 
 	/*
-		main iteration, there is only one event that we want to address
-		to advance the system clock and that is the completion of a map task
-
-		for jobServed < maxJobs {
-		}
+		main iteration of the simulation
 	*/
+
+	for jobServed < maxJobs {
+
+		var servingNode int
+		var nextTime float64
+		for i := range timeOfCompletion {
+			_ = servingNode
+			if nextTime == 0 || timeOfCompletion[i] < nextTime {
+				timeOfCompletion[i] = nextTime
+				servingNode = i
+			}
+		}
+
+		//advance system clock
+		systemClock = nextTime
+
+		//remove task from the service Q and adds it to the join Q
+		task := nodes[servingNode].serviceTasksQ[0]
+		nodes[servingNode].serviceTasksQ = nodes[servingNode].serviceTasksQ[1:]
+		nodes[servingNode].joinTasksQ = append(nodes[servingNode].serviceTasksQ, task)
+
+		if len(inputSplits) == 0 {
+			job := Job{jobSplitted, 10}
+			inputSplits = splitJob(job)
+		}
+
+		sendTasksToQueues()
+
+		if len(nodes[servingNode].serviceTasksQ) == 0 {
+			timeOfCompletion[servingNode] = 0
+		} else {
+			timeOfCompletion[servingNode] = systemClock + rand.ExpFloat64()/rate
+		}
+
+	}
+
 }
