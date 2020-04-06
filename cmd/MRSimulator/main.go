@@ -168,6 +168,6 @@ func main() {
 			timeOfCompletion[servingNode] = rand.ExpFloat64() / rate
 		}
 
-	}f
+	}
 
 }
