@@ -8,6 +8,9 @@ type Node struct {
 	totalDelay        float64
 	taskCompleted     int
 	timeStationaryLen float64
+	nk                map[string]int
+	nk2               int
+	lambda            float64
 
 	/*
 		time in which the queue has n  elements in it (n = index of the slice)
