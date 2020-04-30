@@ -9,7 +9,6 @@ import (
 
 const nNodes = 3
 const maxJobs = 1000
-const lenQ = 5
 const nPartsOfJob = 9
 
 var nodes []Node
@@ -67,43 +66,49 @@ func initialize() {
 
 func sendTasksToQueues() {
 	var nodeID = 0
-	var nFullQueues = 0
 	var task string
 
 	for range inputSplits {
 		task, inputSplits = inputSplits[0], inputSplits[1:]
-
-		for nodeID < len(nodes) {
-			if len(nodes[nodeID].serviceTasksQ) < lenQ {
-				nodes[nodeID].serviceTasksQ = append(nodes[nodeID].serviceTasksQ, task)
-				arrivalTimes[task] = systemClock
+		if nodeID == len(nodes) {
+			nodeID = 0
+		}
+		nodes[nodeID].serviceTasksQ = append(nodes[nodeID].serviceTasksQ, task)
+		arrivalTimes[task] = systemClock
+		nodeID++
+		/*
+			for nodeID < len(nodes) {
+				if len(nodes[nodeID].serviceTasksQ) < lenQ {
+					nodes[nodeID].serviceTasksQ = append(nodes[nodeID].serviceTasksQ, task)
+					arrivalTimes[task] = systemClock
+					nodeID++
+					if nodeID >= len(nodes) {
+						nodeID = 0
+					}
+					break
+				} else {
+					for n := range nodes {
+						if len(nodes[n].serviceTasksQ) >= lenQ {
+							nFullQueues++
+						} else {
+							nFullQueues = 0
+							break
+						}
+					}
+				}
 				nodeID++
 				if nodeID >= len(nodes) {
 					nodeID = 0
 				}
-				break
-			} else {
-				for n := range nodes {
-					if len(nodes[n].serviceTasksQ) >= lenQ {
-						nFullQueues++
-					} else {
-						nFullQueues = 0
-						break
-					}
+				if nFullQueues == len(nodes) {
+					inputSplits = append([]string{task}, inputSplits...)
+					break
 				}
 			}
-			nodeID++
-			if nodeID >= len(nodes) {
-				nodeID = 0
-			}
 			if nFullQueues == len(nodes) {
-				inputSplits = append([]string{task}, inputSplits...)
 				break
 			}
-		}
-		if nFullQueues == len(nodes) {
-			break
-		}
+		*/
 	}
 }
 
@@ -159,17 +164,19 @@ func Start() {
 			}
 		}
 
-		fmt.Println("---- ITERATION ----")
-		for i2 := range nodes {
-			fmt.Println(nodes[i2].serviceTasksQ)
+		/*
+			fmt.Println("---- ITERATION ----")
+			for i2 := range nodes {
+				fmt.Println(nodes[i2].serviceTasksQ)
 
-		}
-		fmt.Println(fmt.Sprint("node serving:", servingNode))
+			}
+			fmt.Println(fmt.Sprint("node serving:", servingNode))
 
-		for i2 := range nodes {
-			fmt.Println(nodes[i2].joinTasksQ)
+			for i2 := range nodes {
+				fmt.Println(nodes[i2].joinTasksQ)
 
-		}
+			}
+		*/
 
 		currentTask = nodes[servingNode].serviceTasksQ[0]
 		nodes[servingNode].lenJoin = len(nodes[servingNode].joinTasksQ)
@@ -239,7 +246,7 @@ func Start() {
 				_ = rate
 				_ = t
 				//timeOfCompletion[servingNode] = t * rate
-				timeOfCompletion[servingNode] = (rand.ExpFloat64() * rate)
+				timeOfCompletion[servingNode] = (rand.ExpFloat64() / lambdas[servingNode])
 			} else {
 				timeOfCompletion[servingNode] = (rand.ExpFloat64() / lambdas[servingNode])
 
