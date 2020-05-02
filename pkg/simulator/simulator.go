@@ -241,7 +241,6 @@ func Start(rc bool, n int, jobs int) {
 	}
 	computeStatistics()
 	printResults()
-	fmt.Println(lambdas)
 }
 
 func printResults() {
