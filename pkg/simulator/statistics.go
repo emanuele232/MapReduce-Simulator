@@ -8,8 +8,16 @@ var avgServiceDelay []float64
 /*
 update statistical counters
 */
-func updateCounters() {
+func updateDelay() {
 	nodes[servingNode].totalDelay += systemClock - arrivalTimes[currentTask]
+}
+
+func updateAvgLen() {
+	if nodes[servingNode].lenJoin != len(nodes[servingNode].joinTasksQ) {
+		nodes[servingNode].totalTimeStationaryLen[nodes[servingNode].lenJoin] +=
+			systemClock - nodes[servingNode].timeStationaryLen
+		nodes[servingNode].timeStationaryLen = systemClock
+	}
 }
 
 func computeAvgLen() {

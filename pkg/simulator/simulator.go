@@ -53,8 +53,7 @@ func initialize() {
 			taskCompleted:          0,
 			totalTimeStationaryLen: make(map[int]float64),
 			timeStationaryLen:      0,
-			nk:                     make(map[string]int),
-			nk2:                    0,
+			nk:                     0,
 			lambda:                 rand.Float64()})
 	}
 	//create and split the first job
@@ -132,11 +131,38 @@ func remove(s []string, i int) []string {
 	return s[:len(s)-1]
 }
 
+/*
+	calculates a new timeOfCompletion for the servingNode,
+	it considers :
+		-if the servingQ is empty
+		-if ratecontrol is enabled
+		-if the parameter nk is >= 0
+*/
+func newServiceTime() {
+	if len(nodes[servingNode].serviceTasksQ) == 0 {
+		timeOfCompletion[servingNode] = 0
+	} else {
+		var rate float64
+		if nodes[servingNode].nk >= 0 && rateControl {
+			rate = float64(nodes[servingNode].nk + 1)
+			var t = (rand.ExpFloat64() / lambdas[servingNode])
+
+			timeOfCompletion[servingNode] = t * rate
+		} else {
+			timeOfCompletion[servingNode] = (rand.ExpFloat64() / lambdas[servingNode])
+
+		}
+
+	}
+
+}
+
 //Start the main cycle of the simulator
 func Start(rc bool, n int, jobs int) {
 	rateControl = rc
 	nNodes = n
 	maxJobs = jobs
+
 	initialize()
 	sendTasksToQueues()
 
@@ -155,35 +181,19 @@ func Start(rc bool, n int, jobs int) {
 		currentTask = nodes[servingNode].serviceTasksQ[0]
 		nodes[servingNode].lenJoin = len(nodes[servingNode].joinTasksQ)
 
-		updateCounters()
-		/*
-			if servingNode == 0 {
-				fmt.Println(nodes[servingNode].serviceTasksQ)
-				fmt.Println(nodes[servingNode].joinTasksQ)
-			}
-		*/
+		updateDelay()
+
 		//remove task from the service Q and adds it to the join Q
 		nodes[servingNode].serviceTasksQ = nodes[servingNode].serviceTasksQ[1:]
-
 		nodes[servingNode].joinTasksQ = append(nodes[servingNode].joinTasksQ, currentTask)
 		nodes[servingNode].taskCompleted++
-		nodes[servingNode].nk2++
+		nodes[servingNode].nk++
 
 		if servingNode == 0 {
-			nodes[len(nodes)-1].nk2--
+			nodes[len(nodes)-1].nk--
 		} else {
-			var nk2 = servingNode - 1
-			nodes[nk2].nk2--
-		}
-
-		s := strings.Split(currentTask, "_")[0]
-		nodes[servingNode].nk[s]++
-
-		if servingNode == 0 {
-			nodes[len(nodes)-1].nk[s]--
-		} else {
-			var nk2 = servingNode - 1
-			nodes[nk2].nk[s]--
+			var nk = servingNode - 1
+			nodes[nk].nk--
 		}
 
 		//advance system clock
@@ -200,43 +210,22 @@ func Start(rc bool, n int, jobs int) {
 			}
 		}
 
+		//if a job finished this tick, reduce it
 		reduce()
 
-		if nodes[servingNode].lenJoin != len(nodes[servingNode].joinTasksQ) {
-			nodes[servingNode].totalTimeStationaryLen[nodes[servingNode].lenJoin] +=
-				systemClock - nodes[servingNode].timeStationaryLen
-			nodes[servingNode].timeStationaryLen = systemClock
-		}
+		//update of statistical counters
+		updateAvgLen()
 
 		if len(inputSplits) == 0 {
 			job := Job{jobSplitted, nPartsOfJob}
 			inputSplits = job.splitJob()
 		}
 
+		//sends tasks to all serviceQs
 		sendTasksToQueues()
 
-		/*
-			calculates a new timeOfCompletion for the servingNode,
-			it considers :
-				-if the servingQ is empty
-				-if ratecontrol is enabled
-				-if the parameter nk2 is >= 0
-		*/
-		if len(nodes[servingNode].serviceTasksQ) == 0 {
-			timeOfCompletion[servingNode] = 0
-		} else {
-			var rate float64
-			if nodes[servingNode].nk2 >= 0 && rateControl {
-				rate = float64(nodes[servingNode].nk2 + 1)
-				var t = (rand.ExpFloat64() / lambdas[servingNode])
-
-				timeOfCompletion[servingNode] = t * rate
-			} else {
-				timeOfCompletion[servingNode] = (rand.ExpFloat64() / lambdas[servingNode])
-
-			}
-
-		}
+		//next service time for Serving node
+		newServiceTime()
 
 	}
 	computeStatistics()

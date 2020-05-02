@@ -2,6 +2,7 @@ package simulator
 
 import "fmt"
 
+//Job define
 type Job struct {
 	id     int
 	nTasks int

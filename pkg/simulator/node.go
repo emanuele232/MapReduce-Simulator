@@ -1,5 +1,6 @@
 package simulator
 
+//Node definition
 type Node struct {
 	lenService        int
 	lenJoin           int
@@ -8,8 +9,7 @@ type Node struct {
 	totalDelay        float64
 	taskCompleted     int
 	timeStationaryLen float64
-	nk                map[string]int
-	nk2               int
+	nk                int
 	lambda            float64
 
 	/*
