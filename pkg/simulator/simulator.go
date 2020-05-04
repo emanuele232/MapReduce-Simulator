@@ -56,13 +56,14 @@ func initialize() {
 			nk:                     0,
 			lambda:                 rand.Float64()})
 	}
-	//create and split the first job
+	/*create and split the first job
 	job := Job{jobSplitted, nPartsOfJob}
 	inputSplits = job.splitJob()
+	*/
 
 	//generates the times in which the nodes end the computation of the map tasks
 	for i := 0; i < nNodes; i++ {
-		lambdas[i] = rand.Float64()
+		lambdas[i] = 10 + rand.Float64()
 		//lambdas[i] = 1
 
 	}
@@ -75,6 +76,9 @@ the node where it stopped last usage.
 */
 func sendTasksToQueues() {
 	var task string
+
+	job := Job{jobSplitted, nPartsOfJob}
+	inputSplits = job.splitJob()
 
 	for range inputSplits {
 		task, inputSplits = inputSplits[0], inputSplits[1:]
@@ -166,8 +170,6 @@ func Start(rc bool, n int, jobs int) {
 	initialize()
 	sendTasksToQueues()
 
-	//debug purposes
-
 	for servedJobs < maxJobs {
 
 		nextTime = 0
@@ -216,10 +218,12 @@ func Start(rc bool, n int, jobs int) {
 		//update of statistical counters
 		updateAvgLen()
 
-		if len(inputSplits) == 0 {
-			job := Job{jobSplitted, nPartsOfJob}
-			inputSplits = job.splitJob()
-		}
+		/*
+			if len(inputSplits) == 0 {
+				job := Job{jobSplitted, nPartsOfJob}
+				inputSplits = job.splitJob()
+			}
+		*/
 
 		//sends tasks to all serviceQs
 		sendTasksToQueues()
@@ -230,6 +234,7 @@ func Start(rc bool, n int, jobs int) {
 	}
 	computeStatistics()
 	printResults()
+	fmt.Println(lambdas)
 }
 
 func printResults() {
