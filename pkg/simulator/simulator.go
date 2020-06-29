@@ -95,7 +95,7 @@ func sendTasksToQueues() {
 }
 
 /*
-	Controls is every task of a job is comlpeted, if it is the case
+	Controls is every task of a job is completed, if it is the case
 	removes every task from the join queues
 */
 func reduce() {
