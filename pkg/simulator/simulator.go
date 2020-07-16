@@ -9,6 +9,7 @@ import (
 
 const nPartsOfJob = 6
 
+var distribution string
 var nodes []Node
 var servedJobs int
 var nInputSliced int
@@ -87,6 +88,9 @@ func sendTasksToQueues() {
 		}
 		if len(nodes[nodeSendQ].serviceTasksQ) == 0 {
 			timeOfCompletion[nodeSendQ] = rand.ExpFloat64() / lambdas[nodeSendQ]
+			//!TODO cambiare con diversa distribuizione
+
+			//timeOfCompletion[nodeSendQ] = getDistrInstance()
 		}
 		nodes[nodeSendQ].serviceTasksQ = append(nodes[nodeSendQ].serviceTasksQ, task)
 		arrivalTimes[task] = systemClock
@@ -149,11 +153,13 @@ func newServiceTime() {
 		var rate float64
 		if nodes[servingNode].nk >= 0 && rateControl {
 			rate = float64(nodes[servingNode].nk + 1)
-			var t = (rand.ExpFloat64() / lambdas[servingNode])
+			var t = getDistrInstance()
+			//var t = (rand.ExpFloat64() / lambdas[servingNode])
 
 			timeOfCompletion[servingNode] = t * rate
 		} else {
-			timeOfCompletion[servingNode] = (rand.ExpFloat64() / lambdas[servingNode])
+			//timeOfCompletion[servingNode] = (rand.ExpFloat64() / lambdas[servingNode])
+			timeOfCompletion[servingNode] = getDistrInstance()
 
 		}
 
@@ -162,10 +168,11 @@ func newServiceTime() {
 }
 
 //Start the main cycle of the simulator
-func Start(rc bool, n int, jobs int) {
+func Start(rc bool, n int, jobs int, distr string) {
 	rateControl = rc
 	nNodes = n
 	maxJobs = jobs
+	distribution = distr
 
 	initialize()
 	sendTasksToQueues()
@@ -253,4 +260,6 @@ func printResults() {
 		fmt.Print(fmt.Sprint("Node-", i, ":"))
 		fmt.Println(avgServiceDelay[i])
 	}
+
+	getDistrInstance()
 }

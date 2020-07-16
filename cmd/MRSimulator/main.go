@@ -26,7 +26,7 @@ func main() {
 		fmt.Println()
 
 	} else {
-		simulator.Start(*rateControl, *nNodes, *maxJobs)
+		simulator.Start(*rateControl, *nNodes, *maxJobs, "exp")
 
 	}
 
