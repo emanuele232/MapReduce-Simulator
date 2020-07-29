@@ -1,9 +1,15 @@
 package simulator
 
+import (
+	"fmt"
+	"math"
+)
+
 var arrivalTimes map[string]float64
 var averageDelayQueue []float64
 var avgJoinLen []float64
 var avgServiceDelay []float64
+var energeticConsumption float64
 
 /*
 update statistical counters
@@ -37,7 +43,13 @@ func computeAvgDelay() {
 	}
 }
 
+func computeEnergeticConsumption() {
+	energeticConsumption = math.Pow((float64(servedJobs) / systemClock), 3.0)
+	fmt.Println(float64(servedJobs) / systemClock)
+}
+
 func computeStatistics() {
 	computeAvgLen()
 	computeAvgDelay()
+	computeEnergeticConsumption()
 }
