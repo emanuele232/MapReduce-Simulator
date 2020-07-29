@@ -246,6 +246,7 @@ func Start(rc bool, n int, jobs int, distr string) {
 
 func printResults() {
 	fmt.Println(fmt.Sprintln("System clock:", systemClock))
+	fmt.Println(fmt.Sprintln("Energetic consumption:", energeticConsumption))
 	//fmt.Println(arrivalTimes)
 	fmt.Println("Expected average customers in join queues:")
 	for i := range nodes {

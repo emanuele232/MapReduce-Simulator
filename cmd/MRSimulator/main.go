@@ -9,9 +9,9 @@ import (
 )
 
 func main() {
-	rateControl := flag.Bool("rateControl", true, "is the flag control enabled?")
-	nNodes := flag.Int("nNodes", 5, "the number of nodes")
-	maxJobs := flag.Int("maxJobs", 50, "number of job to be completed to terminate the simulation")
+	//rateControl := flag.Bool("rateControl", true, "is the flag control enabled?")
+	//nNodes := flag.Int("nNodes", 5, "the number of nodes")
+	//maxJobs := flag.Int("maxJobs", 50, "number of job to be completed to terminate the simulation")
 	h := flag.Bool("h", false, "display help")
 	help := flag.Bool("help", false, "display help")
 
@@ -26,7 +26,8 @@ func main() {
 		fmt.Println()
 
 	} else {
-		simulator.Start(*rateControl, *nNodes, *maxJobs, "exp")
+		//simulator.Start(*rateControl, *nNodes, *maxJobs, "exp")
+		simulator.Start(false, 5, 500, "exp")
 
 	}
 
