@@ -29,6 +29,8 @@ func main() {
 		//simulator.Start(*rateControl, *nNodes, *maxJobs, "exp")
 		simulator.Start(false, 5, 500, "exp")
 
+		plotter.Main()
+
 	}
 
 }
