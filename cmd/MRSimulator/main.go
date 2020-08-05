@@ -27,9 +27,9 @@ func main() {
 
 	} else {
 		//simulator.Start(*rateControl, *nNodes, *maxJobs, "exp")
-		simulator.Start(false, 5, 500, "exp")
 
-		plotter.Main()
+		//plotter.Main()
+		simulator.Start("bimodal", 5, 500, "exp")
 
 	}
 

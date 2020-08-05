@@ -15,7 +15,7 @@ var energeticConsumption float64
 update statistical counters
 */
 func updateDelay() {
-	nodes[servingNode].totalDelay += systemClock - arrivalTimes[currentTask]
+	nodes[servingNode].totalDelay = nodes[servingNode].totalDelay + systemClock - arrivalTimes[currentTask]
 }
 
 func updateAvgLen() {

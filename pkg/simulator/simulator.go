@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-const nPartsOfJob = 6
+const nPartsOfJob = 3
 
 var distribution string
 var nodes []Node
@@ -20,13 +20,13 @@ var taskCompletion map[string]int
 var currentTask string
 var servingNode int
 var nextTime float64
-var lambdas []float64
 var timeOfCompletion []float64
 var lastNodes int
 var nodeSendQ int
-var rateControl bool
+var rateControl string
 var nNodes int
 var maxJobs int
+var lambdas [5]float64
 
 func initialize() {
 	servedJobs = 0
@@ -37,10 +37,10 @@ func initialize() {
 	nInputSliced = 0
 	systemClock = 0
 	jobSplitted = 0
+
 	taskCompletion = make(map[string]int)
 	arrivalTimes = make(map[string]float64)
 	avgJoinLen = make([]float64, nNodes)
-	lambdas = make([]float64, nNodes)
 	timeOfCompletion = make([]float64, nNodes)
 
 	//initialize nodes
@@ -62,12 +62,16 @@ func initialize() {
 	inputSplits = job.splitJob()
 	*/
 
-	//generates the times in which the nodes end the computation of the map tasks
+	/*generates the times in which the nodes end the computation of the map tasks
 	for i := 0; i < nNodes; i++ {
-		lambdas[i] = 10 + rand.Float64()
+		lambdas[i] = rand.Float64()
 		//lambdas[i] = 1
 
 	}
+	*/
+	lambdas = [5]float64{0.5, 0.7, 0.8, 0.9, 0.95}
+
+	fmt.Println(lambdas)
 
 }
 
@@ -146,29 +150,9 @@ func remove(s []string, i int) []string {
 		-if ratecontrol is enabled
 		-if the parameter nk is >= 0
 */
-func newServiceTime() {
-	if len(nodes[servingNode].serviceTasksQ) == 0 {
-		timeOfCompletion[servingNode] = 0
-	} else {
-		var rate float64
-		if nodes[servingNode].nk >= 0 && rateControl {
-			rate = float64(nodes[servingNode].nk + 1)
-			var t = getDistrInstance()
-			//var t = (rand.ExpFloat64() / lambdas[servingNode])
-
-			timeOfCompletion[servingNode] = t * rate
-		} else {
-			//timeOfCompletion[servingNode] = (rand.ExpFloat64() / lambdas[servingNode])
-			timeOfCompletion[servingNode] = getDistrInstance()
-
-		}
-
-	}
-
-}
 
 //Start the main cycle of the simulator
-func Start(rc bool, n int, jobs int, distr string) {
+func Start(rc string, n int, jobs int, distr string) {
 	rateControl = rc
 	nNodes = n
 	maxJobs = jobs
@@ -190,8 +174,6 @@ func Start(rc bool, n int, jobs int, distr string) {
 		currentTask = nodes[servingNode].serviceTasksQ[0]
 		nodes[servingNode].lenJoin = len(nodes[servingNode].joinTasksQ)
 
-		updateDelay()
-
 		//remove task from the service Q and adds it to the join Q
 		nodes[servingNode].serviceTasksQ = nodes[servingNode].serviceTasksQ[1:]
 		nodes[servingNode].joinTasksQ = append(nodes[servingNode].joinTasksQ, currentTask)
@@ -207,6 +189,8 @@ func Start(rc bool, n int, jobs int, distr string) {
 
 		//advance system clock
 		systemClock = systemClock + nextTime
+
+		updateDelay()
 
 		/*
 			since the computation is cuncurrent between the nodes we
