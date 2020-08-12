@@ -29,7 +29,7 @@ func main() {
 		//simulator.Start(*rateControl, *nNodes, *maxJobs, "exp")
 
 		//plotter.Main()
-		simulator.Start("bimodal", 5, 500, "exp")
+		simulator.Start("bimodal-random", 5, 500, "exp")
 
 	}
 
