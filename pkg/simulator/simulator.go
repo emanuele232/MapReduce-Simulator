@@ -71,6 +71,8 @@ func initialize() {
 	*/
 	lambdas = [5]float64{0.5, 0.7, 0.8, 0.9, 0.95}
 
+	messages = 0
+
 	fmt.Println(lambdas)
 
 }
@@ -245,6 +247,11 @@ func printResults() {
 		fmt.Print(fmt.Sprint("Node-", i, ":"))
 		fmt.Println(avgServiceDelay[i])
 	}
+
+	fmt.Print("The number of messages needed for ")
+	fmt.Print(rateControl)
+	fmt.Print(": ")
+	fmt.Println(messages)
 
 	getDistrInstance()
 }

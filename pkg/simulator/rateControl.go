@@ -5,6 +5,8 @@ import (
 	"math/rand"
 )
 
+var messages int 
+
 func newServiceTime() {
 	if len(nodes[servingNode].serviceTasksQ) == 0 {
 		timeOfCompletion[servingNode] = 0
@@ -18,6 +20,7 @@ func newServiceTime() {
 			}
 		case "bimodal":
 			{
+				messages++
 				if nodes[servingNode].nk >= 0 {
 
 					var rate = float64(nodes[servingNode].nk + 1)
@@ -44,6 +47,8 @@ func newServiceTime() {
 
 				nextQ := nodes[nextNode].lenJoin
 				currentQ := nodes[servingNode].lenJoin
+
+				messages++
 
 				if currentQ <= nextQ {
 
@@ -83,6 +88,8 @@ func newServiceTime() {
 				previousQ := nodes[previousNode].lenJoin
 				nextQ := nodes[nextNode].lenJoin
 				currentQ := nodes[servingNode].lenJoin
+
+				messages = messages + 2
 
 				if (currentQ >= previousQ) && (currentQ >= nextQ) {
 					var t = getDistrInstance()
@@ -150,6 +157,8 @@ func newServiceTime() {
 				nextQ := nodes[nextNode].lenJoin
 				currentQ := nodes[servingNode].lenJoin
 
+				messages = messages + 2
+
 				if (currentQ >= previousQ) && (currentQ >= nextQ) {
 					var t = getDistrInstance()
 					//var t = (rand.ExpFloat64() / lambdas[servingNode])
@@ -185,6 +194,8 @@ func newServiceTime() {
 				randomNode := rand.Intn(nNodes - 1)
 				randQ := nodes[randomNode].lenJoin
 				currentQ := nodes[servingNode].lenJoin
+
+				messages++
 
 				if currentQ <= randQ {
 
