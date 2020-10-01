@@ -5,7 +5,7 @@ import (
 	"math/rand"
 )
 
-var messages int 
+var messages int
 
 func newServiceTime() {
 	if len(nodes[servingNode].serviceTasksQ) == 0 {

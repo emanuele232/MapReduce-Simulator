@@ -11,7 +11,7 @@ func getDistrInstance() float64 {
 	case "exp":
 		{
 			//fmt.Println("exponential distribution instance")
-			return rand.ExpFloat64() / lambdas[servingNode]
+			return rand.ExpFloat64()
 		}
 	case "hyperexp":
 		{

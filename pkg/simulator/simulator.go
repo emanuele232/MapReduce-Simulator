@@ -7,11 +7,13 @@ import (
 	"strings"
 )
 
-const nPartsOfJob = 3
+const version = 1.0
 
+var nPartsOfJob int
 var distribution string
 var nodes []Node
 var servedJobs int
+var servedTasks int
 var nInputSliced int
 var systemClock float64
 var jobSplitted int
@@ -21,27 +23,39 @@ var currentTask string
 var servingNode int
 var nextTime float64
 var timeOfCompletion []float64
-var lastNodes int
+
+//var lastNodes int
 var nodeSendQ int
 var rateControl string
 var nNodes int
 var maxJobs int
 var lambdas [5]float64
+var totalEnergyConsumed float64
+var nextJobTime float64
+var isServingIteration bool
 
 func initialize() {
 	servedJobs = 0
 	systemClock = 0
 	nodeSendQ = 0
 	servedJobs = 0
-	servedJobs = 0
+	servedTasks = 0
 	nInputSliced = 0
 	systemClock = 0
 	jobSplitted = 0
+	servedJobs = 0
+	servedTasks = 0
+	nInputSliced = 0
+	totalEnergyConsumed = 0
+	nextJobTime = 0
 
 	taskCompletion = make(map[string]int)
 	arrivalTimes = make(map[string]float64)
 	avgJoinLen = make([]float64, nNodes)
+	energeticConsumption = make([]float64, nNodes)
 	timeOfCompletion = make([]float64, nNodes)
+
+	nPartsOfJob = nNodes
 
 	//initialize nodes
 	for i := 0; i < nNodes; i++ {
@@ -69,11 +83,9 @@ func initialize() {
 
 	}
 	*/
-	lambdas = [5]float64{0.5, 0.7, 0.8, 0.9, 0.95}
-
 	messages = 0
 
-	fmt.Println(lambdas)
+	totalEnergyConsumed = 0
 
 }
 
@@ -87,21 +99,42 @@ func sendTasksToQueues() {
 	job := Job{jobSplitted, nPartsOfJob}
 	inputSplits = job.splitJob()
 
-	for range inputSplits {
-		task, inputSplits = inputSplits[0], inputSplits[1:]
-		if nodeSendQ == len(nodes) {
-			nodeSendQ = 0
+	arrivalTimes[string(job.id)] = systemClock
+
+	/*
+		for range inputSplits {
+			task, inputSplits = inputSplits[0], inputSplits[1:]
+			if nodeSendQ == len(nodes) {
+				nodeSendQ = 0
+			}
+			if len(nodes[nodeSendQ].serviceTasksQ) == 0 {
+				timeOfCompletion[nodeSendQ] = rand.ExpFloat64() / lambdas[nodeSendQ]
+				//!TODO cambiare con diversa distribuizione
+
+				//timeOfCompletion[nodeSendQ] = getDistrInstance()
+			}
+			nodes[nodeSendQ].serviceTasksQ = append(nodes[nodeSendQ].serviceTasksQ, task)
+			arrivalTimes[task] = systemClock
+			nodeSendQ++
 		}
-		if len(nodes[nodeSendQ].serviceTasksQ) == 0 {
-			timeOfCompletion[nodeSendQ] = rand.ExpFloat64() / lambdas[nodeSendQ]
+	*/
+
+	for i := range inputSplits {
+		task, inputSplits = inputSplits[0], inputSplits[1:]
+
+		if len(nodes[i].serviceTasksQ) == 0 {
+			timeOfCompletion[i] = getDistrInstance()
 			//!TODO cambiare con diversa distribuizione
 
 			//timeOfCompletion[nodeSendQ] = getDistrInstance()
 		}
-		nodes[nodeSendQ].serviceTasksQ = append(nodes[nodeSendQ].serviceTasksQ, task)
+		nodes[i].serviceTasksQ = append(nodes[i].serviceTasksQ, task)
 		arrivalTimes[task] = systemClock
-		nodeSendQ++
+
 	}
+
+	nextJobTime = rand.ExpFloat64()
+
 }
 
 /*
@@ -121,6 +154,7 @@ func reduce() {
 		remove every split from the join queues
 	*/
 	if taskCompletion[s] == nPartsOfJob {
+		jobTotalDelay = jobTotalDelay + (systemClock - arrivalTimes[s])
 		var pattern = regexp.MustCompile(fmt.Sprint(s, "_[0-9]+$"))
 		for n := range nodes {
 			var e = 0
@@ -161,6 +195,7 @@ func Start(rc string, n int, jobs int, distr string) {
 	distribution = distr
 
 	initialize()
+
 	sendTasksToQueues()
 
 	for servedJobs < maxJobs {
@@ -170,29 +205,53 @@ func Start(rc string, n int, jobs int, distr string) {
 			if (nextTime == 0 || timeOfCompletion[i] < nextTime) && timeOfCompletion[i] != 0 {
 				nextTime = timeOfCompletion[i]
 				servingNode = i
+				isServingIteration = true
 			}
 		}
 
-		currentTask = nodes[servingNode].serviceTasksQ[0]
-		nodes[servingNode].lenJoin = len(nodes[servingNode].joinTasksQ)
-
-		//remove task from the service Q and adds it to the join Q
-		nodes[servingNode].serviceTasksQ = nodes[servingNode].serviceTasksQ[1:]
-		nodes[servingNode].joinTasksQ = append(nodes[servingNode].joinTasksQ, currentTask)
-		nodes[servingNode].taskCompleted++
-		nodes[servingNode].nk++
-
-		if servingNode == 0 {
-			nodes[len(nodes)-1].nk--
-		} else {
-			var nk = servingNode - 1
-			nodes[nk].nk--
+		if nextJobTime < nextTime || nextTime == 0 {
+			isServingIteration = false
+			nextTime = nextJobTime
+			sendTasksToQueues()
+			nextJobTime = rand.ExpFloat64() / 100
 		}
 
 		//advance system clock
 		systemClock = systemClock + nextTime
 
-		updateDelay()
+		//actions that are exclusive of when we are serving a task
+		if isServingIteration {
+			currentTask = nodes[servingNode].serviceTasksQ[0]
+			nodes[servingNode].lenJoin = len(nodes[servingNode].joinTasksQ)
+
+			//remove task from the service Q and adds it to the join Q
+			nodes[servingNode].serviceTasksQ = nodes[servingNode].serviceTasksQ[1:]
+			nodes[servingNode].joinTasksQ = append(nodes[servingNode].joinTasksQ, currentTask)
+			nodes[servingNode].taskCompleted++
+			nodes[servingNode].nk++
+
+			if servingNode == 0 {
+				nodes[len(nodes)-1].nk--
+			} else {
+				var nk = servingNode - 1
+				nodes[nk].nk--
+			}
+
+			servedTasks++
+
+			updateDelay()
+
+			updateEnergeticConsumption()
+
+			//if a job finished this tick, reduce it
+			reduce()
+
+			//update of statistical counters
+			updateAvgLen()
+
+			//next service time for Serving node
+			newServiceTime()
+		}
 
 		/*
 			since the computation is cuncurrent between the nodes we
@@ -204,12 +263,9 @@ func Start(rc string, n int, jobs int, distr string) {
 				timeOfCompletion[i] = timeOfCompletion[i] - nextTime
 			}
 		}
-
-		//if a job finished this tick, reduce it
-		reduce()
-
-		//update of statistical counters
-		updateAvgLen()
+		if !isServingIteration {
+			nextJobTime = nextJobTime - nextTime
+		}
 
 		/*
 			if len(inputSplits) == 0 {
@@ -219,39 +275,10 @@ func Start(rc string, n int, jobs int, distr string) {
 		*/
 
 		//sends tasks to all serviceQs
-		sendTasksToQueues()
-
-		//next service time for Serving node
-		newServiceTime()
+		//sendTasksToQueues()
 
 	}
 	computeStatistics()
 	printResults()
-	fmt.Println(lambdas)
-}
-
-func printResults() {
-	fmt.Println(fmt.Sprintln("System clock:", systemClock))
-	fmt.Println(fmt.Sprintln("Energetic consumption:", energeticConsumption))
-	//fmt.Println(arrivalTimes)
-	fmt.Println("Expected average customers in join queues:")
-	for i := range nodes {
-		fmt.Print(fmt.Sprint("Node-", i, ":"))
-		fmt.Println(avgJoinLen[i])
-	}
-
-	fmt.Println("\n------------------------------")
-
-	fmt.Println("Expected average delay in service queues:")
-	for i := range nodes {
-		fmt.Print(fmt.Sprint("Node-", i, ":"))
-		fmt.Println(avgServiceDelay[i])
-	}
-
-	fmt.Print("The number of messages needed for ")
-	fmt.Print(rateControl)
-	fmt.Print(": ")
-	fmt.Println(messages)
-
-	getDistrInstance()
+	reset()
 }
