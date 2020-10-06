@@ -10,8 +10,11 @@ func getDistrInstance() float64 {
 	switch d := distribution; d {
 	case "exp":
 		{
+
 			//fmt.Println("exponential distribution instance")
-			return rand.ExpFloat64()
+			e := rand.ExpFloat64()
+			return e
+
 		}
 	case "hyperexp":
 		{

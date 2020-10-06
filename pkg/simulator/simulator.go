@@ -133,7 +133,7 @@ func sendTasksToQueues() {
 
 	}
 
-	nextJobTime = rand.ExpFloat64()
+	nextJobTime = rand.ExpFloat64() / 10
 
 }
 
@@ -154,7 +154,15 @@ func reduce() {
 		remove every split from the join queues
 	*/
 	if taskCompletion[s] == nPartsOfJob {
-		jobTotalDelay = jobTotalDelay + (systemClock - arrivalTimes[s])
+		jobTotalDelay = jobTotalDelay + (systemClock - arrivalTimes[s+"_0"])
+
+		/*
+			fmt.Println(fmt.Sprint("j:", s))
+			fmt.Println(fmt.Sprint("clock:", systemClock))
+			fmt.Println(fmt.Sprint("partial:", systemClock-arrivalTimes[s+"_0"]))
+			fmt.Println(fmt.Sprint("jtd:", jobTotalDelay))
+			fmt.Println("\n\n")
+		*/
 		var pattern = regexp.MustCompile(fmt.Sprint(s, "_[0-9]+$"))
 		for n := range nodes {
 			var e = 0
@@ -200,6 +208,7 @@ func Start(rc string, n int, jobs int, distr string) {
 
 	for servedJobs < maxJobs {
 
+		fmt.Println(timeOfCompletion)
 		nextTime = 0
 		for i := range timeOfCompletion {
 			if (nextTime == 0 || timeOfCompletion[i] < nextTime) && timeOfCompletion[i] != 0 {
@@ -208,13 +217,41 @@ func Start(rc string, n int, jobs int, distr string) {
 				isServingIteration = true
 			}
 		}
+		/*
+			fmt.Println(nextTime)
+			fmt.Println(fmt.Sprint("njt:", nextJobTime))
 
-		if nextJobTime < nextTime || nextTime == 0 {
+			fmt.Println(len(nodes[0].serviceTasksQ))
+		*/
+
+		lenCheck := 1
+		for n := range nodes {
+			lenCheck = lenCheck * len(nodes[n].serviceTasksQ)
+		}
+		fmt.Println(lenCheck)
+		if lenCheck == 0 {
+			sendTasksToQueues()
+		}
+
+		if nextJobTime < nextTime {
 			isServingIteration = false
 			nextTime = nextJobTime
 			sendTasksToQueues()
-			nextJobTime = rand.ExpFloat64() / 100
+			nextJobTime = rand.ExpFloat64() * 20
 		}
+
+		fmt.Println(nextTime)
+		fmt.Println("\n")
+
+		/*
+			fmt.Println(fmt.Sprint("nt:", nextTime))
+			fmt.Println(fmt.Sprint("jt:", nextJobTime))
+
+			fmt.Println(fmt.Sprint("sc: ", systemClock))
+			fmt.Println(fmt.Sprint("nt: ", nextTime))
+			fmt.Println(fmt.Sprint("isi: ", isServingIteration))
+			fmt.Println(fmt.Sprint("node: ", servingNode))
+		*/
 
 		//advance system clock
 		systemClock = systemClock + nextTime
@@ -258,14 +295,26 @@ func Start(rc string, n int, jobs int, distr string) {
 			update the time that the other nodes need to complete their
 			tasks
 		*/
+		fmt.Println(timeOfCompletion)
 		for i := range timeOfCompletion {
-			if timeOfCompletion[i] != 0 {
+			if i != servingNode {
 				timeOfCompletion[i] = timeOfCompletion[i] - nextTime
 			}
 		}
-		if !isServingIteration {
+		/*
+			fmt.Println(fmt.Sprint("nt:", nextTime))
+			fmt.Println(timeOfCompletion)
+			fmt.Println(isServingIteration)
+			fmt.Println("\n")
+		*/
+
+		if isServingIteration {
 			nextJobTime = nextJobTime - nextTime
 		}
+		/*
+			fmt.Println(fmt.Sprint("toc:", timeOfCompletion))
+			fmt.Println(fmt.Sprint("njt:", nextJobTime))
+		*/
 
 		/*
 			if len(inputSplits) == 0 {

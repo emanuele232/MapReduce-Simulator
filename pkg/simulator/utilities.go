@@ -66,6 +66,8 @@ func printResults() {
 		fmt.Println(energeticConsumption[i])
 	}
 
+	fmt.Println(fmt.Sprint("sql0: ", len(nodes[0].serviceTasksQ)))
+
 	reset()
 
 }
