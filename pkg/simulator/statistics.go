@@ -34,6 +34,12 @@ func updateAvgLen() {
 func updateEnergeticConsumption() {
 	var f = math.Pow(1/timeOfCompletion[servingNode], 2)
 	energeticConsumption[servingNode] = energeticConsumption[servingNode] + (f * timeOfCompletion[servingNode])
+	if servingNode == 0 && (f*timeOfCompletion[servingNode]) < 0 {
+		/*
+			fmt.Println(fmt.Sprintln("f:", f))
+			fmt.Println(fmt.Sprintln("toc:", timeOfCompletion[servingNode]))
+		*/
+	}
 
 	/*
 		fmt.Print("node: ")
