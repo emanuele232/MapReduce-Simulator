@@ -4,3 +4,6 @@ main.exe
 .vscode/launch.json
 install.sh
 .gitignore
+outputs/*
+cmd/MRSimulator/*
+.gitignore

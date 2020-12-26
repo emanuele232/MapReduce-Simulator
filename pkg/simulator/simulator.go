@@ -87,6 +87,8 @@ func initialize() {
 
 	totalEnergyConsumed = 0
 
+	nextJobTime = rand.ExpFloat64() * 20
+
 }
 
 /*
@@ -197,8 +199,6 @@ func Start(rc string, n int, jobs int, distr string) {
 
 	initialize()
 
-	sendTasksToQueues()
-
 	for servedJobs < maxJobs {
 		lenCheck := 1
 		for n := range nodes {
@@ -206,6 +206,7 @@ func Start(rc string, n int, jobs int, distr string) {
 		}
 		if lenCheck == 0 {
 			sendTasksToQueues()
+			fmt.Println("Borgodio")
 		}
 
 		nextTime = 0
@@ -222,6 +223,17 @@ func Start(rc string, n int, jobs int, distr string) {
 			nextTime = nextJobTime
 			sendTasksToQueues()
 			nextJobTime = rand.ExpFloat64() * 20
+		}
+
+		fmt.Println(fmt.Sprint("serving: ", isServingIteration))
+		fmt.Println(fmt.Sprint("Systemclock: ", systemClock))
+		fmt.Println(fmt.Sprint("Working node:", servingNode))
+		fmt.Println(fmt.Sprint("Next time:", nextTime))
+		fmt.Println(fmt.Sprint("Served tasks:", servedTasks))
+		fmt.Println(fmt.Sprint("Served jobs:", servedJobs))
+		fmt.Println(fmt.Sprint("time of completion:", timeOfCompletion))
+		for i := range nodes {
+			fmt.Println(fmt.Sprint("queue node ", i, ": ", len(nodes[i].serviceTasksQ)))
 		}
 
 		//advance system clock
@@ -260,6 +272,8 @@ func Start(rc string, n int, jobs int, distr string) {
 			//next service time for Serving node
 			newServiceTime()
 		}
+
+		fmt.Println("------------------------------\n")
 
 		/*
 			since the computation is cuncurrent between the nodes we

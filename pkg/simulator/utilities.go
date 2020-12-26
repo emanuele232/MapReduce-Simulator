@@ -50,6 +50,9 @@ func printResults() {
 	fdelay := jobTotalDelay / float64(maxJobs)
 	fmt.Print(fdelay)
 
+	fmt.Print("Job Avg service delay: ")
+	fmt.Print(avgServiceDelayf)
+
 	fmt.Println("\n------------------------------")
 
 	fmt.Println("Expected average customers in join queues:")

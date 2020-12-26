@@ -1,6 +1,7 @@
 package simulator
 
 import (
+	"fmt"
 	"math"
 	//"fmt"
 )
@@ -8,7 +9,11 @@ import (
 var arrivalTimes map[string]float64
 var averageDelayQueue []float64
 var avgJoinLen []float64
+var avgJoinLenc float64
 var avgServiceDelay []float64
+var avgServiceDelayf float64
+var avgServiceDelayc float64
+var avgServiceDelaycc float64
 var energeticConsumption []float64
 var jobTotalDelay float64
 var energyOnTime float64
@@ -19,8 +24,12 @@ update statistical counters
 */
 func updateDelay() {
 	nodes[servingNode].totalDelay = nodes[servingNode].totalDelay + systemClock - arrivalTimes[currentTask]
-	//fmt.Println(fmt.Sprintln(systemClock, "-", arrivalTimes[currentTask], "=", systemClock-arrivalTimes[currentTask]))
+	avg := nodes[servingNode].totalDelay / float64(nodes[servingNode].taskCompleted)
+	avgServiceDelayc += avg
+	fmt.Println("")
 
+	avgServiceDelaycc = avgServiceDelayc / float64(servedTasks)
+	fmt.Println(fmt.Sprint("avgDelay:", avgServiceDelaycc))
 }
 
 func updateAvgLen() {
@@ -29,17 +38,20 @@ func updateAvgLen() {
 			systemClock - nodes[servingNode].timeStationaryLen
 		nodes[servingNode].timeStationaryLen = systemClock
 	}
+	for i := range nodes[0].totalTimeStationaryLen {
+		avgJoinLenc += float64(i) * nodes[0].totalTimeStationaryLen[i]
+	}
+	avgJoinLenc = avgJoinLenc / systemClock
+	fmt.Println(fmt.Sprint("avglen:", avgJoinLenc))
 }
 
 func updateEnergeticConsumption() {
 	var f = math.Pow(1/timeOfCompletion[servingNode], 2)
 	energeticConsumption[servingNode] = energeticConsumption[servingNode] + (f * timeOfCompletion[servingNode])
-	if servingNode == 0 && (f*timeOfCompletion[servingNode]) < 0 {
-		/*
-			fmt.Println(fmt.Sprintln("f:", f))
-			fmt.Println(fmt.Sprintln("toc:", timeOfCompletion[servingNode]))
-		*/
+	for i := range nodes {
+		totalEnergyConsumed = totalEnergyConsumed + energeticConsumption[i]
 	}
+	fmt.Println(fmt.Sprint("totale energy:", totalEnergyConsumed))
 
 	/*
 		fmt.Print("node: ")
@@ -71,7 +83,9 @@ func computeAvgDelay() {
 	for n := range nodes {
 		var avg = nodes[n].totalDelay / float64(nodes[n].taskCompleted)
 		avgServiceDelay = append(avgServiceDelay, avg)
+		avgServiceDelayf += avg
 	}
+	avgServiceDelayf = avgServiceDelayf / float64(len(nodes))
 }
 
 func computeTotalEnergy() {
