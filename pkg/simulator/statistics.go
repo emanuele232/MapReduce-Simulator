@@ -26,10 +26,11 @@ func updateDelay() {
 	nodes[servingNode].totalDelay = nodes[servingNode].totalDelay + systemClock - arrivalTimes[currentTask]
 	avg := nodes[servingNode].totalDelay / float64(nodes[servingNode].taskCompleted)
 	avgServiceDelayc += avg
-	fmt.Println("")
+	// fmt.Println("")
 
 	avgServiceDelaycc = avgServiceDelayc / float64(servedTasks)
-	fmt.Println(fmt.Sprint("avgDelay:", avgServiceDelaycc))
+	// fmt.Println(fmt.Sprint("avgDelay:", avgServiceDelaycc))
+
 }
 
 func updateAvgLen() {
@@ -42,16 +43,16 @@ func updateAvgLen() {
 		avgJoinLenc += float64(i) * nodes[0].totalTimeStationaryLen[i]
 	}
 	avgJoinLenc = avgJoinLenc / systemClock
-	fmt.Println(fmt.Sprint("avglen:", avgJoinLenc))
+	// fmt.Println(fmt.Sprint("avglen:", avgJoinLenc))
 }
 
 func updateEnergeticConsumption() {
 	var f = math.Pow(1/timeOfCompletion[servingNode], 2)
 	energeticConsumption[servingNode] = energeticConsumption[servingNode] + (f * timeOfCompletion[servingNode])
-	for i := range nodes {
-		totalEnergyConsumed = totalEnergyConsumed + energeticConsumption[i]
-	}
-	fmt.Println(fmt.Sprint("totale energy:", totalEnergyConsumed))
+	// for i := range nodes {
+	// 	totalEnergyConsumed = totalEnergyConsumed + energeticConsumption[i]
+	// }
+	// // fmt.Println(fmt.Sprint("totale energy:", totalEnergyConsumed))
 
 	/*
 		fmt.Print("node: ")
@@ -75,7 +76,7 @@ func computeAvgLen() {
 		for i := range nodes[n].totalTimeStationaryLen {
 			avgJoinLen[n] += float64(i) * nodes[n].totalTimeStationaryLen[i]
 		}
-		avgJoinLen[n] = avgJoinLen[n] / systemClock
+		avgJoinLen[n] = avgJoinLen[n] / (systemClock * 5)
 	}
 }
 
@@ -91,6 +92,9 @@ func computeAvgDelay() {
 func computeTotalEnergy() {
 	for i := range nodes {
 		totalEnergyConsumed = totalEnergyConsumed + energeticConsumption[i]
+		fmt.Print(totalEnergyConsumed)
+		fmt.Print(" + ")
+		fmt.Println(energeticConsumption[i])
 	}
 	energyOnTime = totalEnergyConsumed / systemClock
 	energyOnNJob = totalEnergyConsumed / float64(maxJobs)

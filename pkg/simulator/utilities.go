@@ -1,6 +1,10 @@
 package simulator
 
-import "fmt"
+import (
+	"fmt"
+	"html/template"
+	"os"
+)
 
 func reset() {
 	nodes = nil
@@ -33,7 +37,6 @@ func printResults() {
 
 	fmt.Print("The energy consumed by the system:")
 	fmt.Println(totalEnergyConsumed)
-
 	fmt.Print("\nEnergy consumed on unit of time: ")
 	fmt.Println(energyOnTime)
 
@@ -69,6 +72,55 @@ func printResults() {
 		fmt.Println(energeticConsumption[i])
 	}
 
-	reset()
+}
 
+func populateTemplate() {
+	type Templatedata struct {
+		Clock       float64
+		Energy      float64
+		EnergyJob   float64
+		EnergyTime  float64
+		Avgdelay    float64
+		AvgSvcDelay float64
+		Messages    int
+		Node01      float64
+		Node02      float64
+		Node11      float64
+		Node12      float64
+		Node21      float64
+		Node22      float64
+		Node31      float64
+		Node32      float64
+		Node41      float64
+		Node42      float64
+	}
+
+	data := Templatedata{
+		systemClock,
+		totalEnergyConsumed,
+		energyOnNJob,
+		energyOnTime,
+		jobTotalDelay / float64(maxJobs),
+		avgServiceDelayf,
+		messages,
+		avgJoinLen[0],
+		energeticConsumption[0],
+		avgJoinLen[1],
+		energeticConsumption[1],
+		avgJoinLen[2],
+		energeticConsumption[2],
+		avgJoinLen[3],
+		energeticConsumption[3],
+		avgJoinLen[4],
+		energeticConsumption[4],
+	}
+
+	t, err := template.ParseFiles("../../templates/result_table")
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("\n\n\n")
+	err = t.Execute(os.Stdout, data)
+
+	reset()
 }

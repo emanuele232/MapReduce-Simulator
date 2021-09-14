@@ -23,6 +23,8 @@ var currentTask string
 var servingNode int
 var nextTime float64
 var timeOfCompletion []float64
+var expRate float64
+var arrivalRate float64
 
 //var lastNodes int
 var nodeSendQ int
@@ -48,6 +50,9 @@ func initialize() {
 	nInputSliced = 0
 	totalEnergyConsumed = 0
 	nextJobTime = 0
+
+	expRate = 5.0
+	arrivalRate = 10.0
 
 	taskCompletion = make(map[string]int)
 	arrivalTimes = make(map[string]float64)
@@ -89,6 +94,18 @@ func initialize() {
 
 	nextJobTime = rand.ExpFloat64() * 20
 
+}
+
+func checkpercentage() {
+	if servedJobs == maxJobs/10 {
+		fmt.Println("10%")
+	}
+	if servedJobs == maxJobs/5 {
+		fmt.Println("20%")
+	}
+	if servedJobs == maxJobs/2 {
+		fmt.Println("50%")
+	}
 }
 
 /*
@@ -206,7 +223,6 @@ func Start(rc string, n int, jobs int, distr string) {
 		}
 		if lenCheck == 0 {
 			sendTasksToQueues()
-			fmt.Println("Borgodio")
 		}
 
 		nextTime = 0
@@ -222,19 +238,19 @@ func Start(rc string, n int, jobs int, distr string) {
 			isServingIteration = false
 			nextTime = nextJobTime
 			sendTasksToQueues()
-			nextJobTime = rand.ExpFloat64() * 20
+			nextJobTime = rand.ExpFloat64() / arrivalRate
 		}
 
-		fmt.Println(fmt.Sprint("serving: ", isServingIteration))
-		fmt.Println(fmt.Sprint("Systemclock: ", systemClock))
-		fmt.Println(fmt.Sprint("Working node:", servingNode))
-		fmt.Println(fmt.Sprint("Next time:", nextTime))
-		fmt.Println(fmt.Sprint("Served tasks:", servedTasks))
-		fmt.Println(fmt.Sprint("Served jobs:", servedJobs))
-		fmt.Println(fmt.Sprint("time of completion:", timeOfCompletion))
-		for i := range nodes {
-			fmt.Println(fmt.Sprint("queue node ", i, ": ", len(nodes[i].serviceTasksQ)))
-		}
+		// fmt.Println(fmt.Sprint("serving: ", isServingIteration))
+		// fmt.Println(fmt.Sprint("Systemclock: ", systemClock))
+		// fmt.Println(fmt.Sprint("Working node:", servingNode))
+		// fmt.Println(fmt.Sprint("Next time:", nextTime))
+		// fmt.Println(fmt.Sprint("Served tasks:", servedTasks))
+		//
+		// fmt.Println(fmt.Sprint("time of completion:", timeOfCompletion))
+		// for i := range nodes {
+		// 	fmt.Println(fmt.Sprint("queue node ", i, ": ", len(nodes[i].serviceTasksQ)))
+		// }
 
 		//advance system clock
 		systemClock = systemClock + nextTime
@@ -273,7 +289,7 @@ func Start(rc string, n int, jobs int, distr string) {
 			newServiceTime()
 		}
 
-		fmt.Println("------------------------------\n")
+		// fmt.Println("------------------------------\n")
 
 		/*
 			since the computation is cuncurrent between the nodes we
@@ -306,5 +322,7 @@ func Start(rc string, n int, jobs int, distr string) {
 	}
 	computeStatistics()
 	printResults()
+	populateTemplate()
 	reset()
+
 }
