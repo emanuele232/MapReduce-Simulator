@@ -1,0 +1,21 @@
+\begin{table}[]
+    \centering
+    \begin{tabular}{|l|l|l|}
+    \hline
+    System clock & {{.Clock}} &  \\ \hline
+    Energy consumed (system) & {{.Energy}} &  \\ \hline
+    Energy / job & {{.EnergyJob}} &  \\ \hline
+    Energy / time & {{.EnergyTime}} &  \\ \hline
+    Job avg. delay & {{.Avgdelay}} &  \\ \hline
+    Job avg. service delay & {{.AvgSvcDelay}} &  \\ \hline
+    \# of messages required & {{.Messages}} &  \\ \hline
+     &  &  \\ \hline
+     & \begin{tabular}[c]{@{}l@{}}Average Customers\\ (join quques)\end{tabular} & Energetic consumption \\ \hline
+    Node0 & {{.Node01}} & {{.Node02}} \\ \hline
+    Node1 & {{.Node11}} & {{.Node12}} \\ \hline
+    Node2 & {{.Node21}} & {{.Node22}} \\ \hline
+    Node3 & {{.Node31}} & {{.Node32}} \\ \hline
+    Node4 & {{.Node41}} & {{.Node42}} \\ \hline
+    \end{tabular}
+    \caption{\label{tab:firstS}First run without rate control.}
+\end{table} 

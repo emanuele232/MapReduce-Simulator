@@ -30,7 +30,8 @@ func main() {
 
 		//plotter.Main()
 		//simulator.Start("no", 5, 5000000, "exp")
-		simulator.Start("bimodal", 5, 500000, "exp")
+		simulator.Start("bimodal", 5, 5, "exp")
+
 		//simulator.Start("bimodal-fixed", 5, 50000, "exp")
 
 		//simulator.Start("bimodal", 5, 200000, "exp")
