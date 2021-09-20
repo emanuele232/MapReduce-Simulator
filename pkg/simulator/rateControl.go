@@ -20,10 +20,21 @@ func newServiceTime() {
 			}
 		case "bimodal":
 			{
-				messages++
-				if nodes[servingNode].nk >= 0 {
+				var nextNode int
 
-					var rate = float64(nodes[servingNode].nk + 1)
+				if servingNode == nNodes-1 {
+					nextNode = 0
+				} else {
+					nextNode = servingNode + 1
+				}
+
+				nextQ := nodes[nextNode].lenJoin
+				currentQ := nodes[servingNode].lenJoin
+
+				messages++
+				if currentQ > nextQ {
+
+					var rate = float64(currentQ - nextQ)
 					var t = getDistrInstance()
 					//var t = (rand.ExpFloat64() / lambdas[servingNode])
 

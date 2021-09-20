@@ -12,7 +12,7 @@ func getDistrInstance() float64 {
 		{
 
 			//fmt.Println("exponential distribution instance")
-			e := rand.ExpFloat64() / expRate
+			e := (rand.ExpFloat64() / expRate) + 1
 			return e
 
 		}

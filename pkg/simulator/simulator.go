@@ -74,7 +74,8 @@ func initialize() {
 			totalTimeStationaryLen: make(map[int]float64),
 			timeStationaryLen:      0,
 			nk:                     0,
-			lambda:                 rand.Float64()})
+			lambda:                 rand.Float64(),
+			timeUtilization:        0})
 	}
 	/*create and split the first job
 	job := Job{jobSplitted, nPartsOfJob}
@@ -277,8 +278,6 @@ func Start(rc string, n int, jobs int, distr string) {
 
 			updateDelay()
 
-			updateEnergeticConsumption()
-
 			//if a job finished this tick, reduce it
 			reduce()
 
@@ -287,6 +286,11 @@ func Start(rc string, n int, jobs int, distr string) {
 
 			//next service time for Serving node
 			newServiceTime()
+
+			if timeOfCompletion[servingNode] != 0 {
+				updateEnergeticConsumption()
+			}
+
 		}
 
 		// fmt.Println("------------------------------\n")

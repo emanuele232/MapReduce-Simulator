@@ -11,6 +11,7 @@ type Node struct {
 	timeStationaryLen float64
 	nk                int
 	lambda            float64
+	timeUtilization   float64
 
 	/*
 		time in which the queue has n  elements in it (n = index of the slice)

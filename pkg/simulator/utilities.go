@@ -3,6 +3,7 @@ package simulator
 import (
 	"fmt"
 	"html/template"
+	"math"
 	"os"
 )
 
@@ -96,23 +97,23 @@ func populateTemplate() {
 	}
 
 	data := Templatedata{
-		systemClock,
-		totalEnergyConsumed,
-		energyOnNJob,
-		energyOnTime,
-		jobTotalDelay / float64(maxJobs),
-		avgServiceDelayf,
+		math.Round(systemClock*100) / 100,
+		math.Round(totalEnergyConsumed*100) / 100,
+		math.Round(energyOnNJob*100) / 100,
+		math.Round(energyOnTime*100) / 100,
+		math.Round(jobTotalDelay/float64(maxJobs)*100) / 100,
+		math.Round(avgServiceDelayf*100) / 100,
 		messages,
-		avgJoinLen[0],
-		energeticConsumption[0],
-		avgJoinLen[1],
-		energeticConsumption[1],
-		avgJoinLen[2],
-		energeticConsumption[2],
-		avgJoinLen[3],
-		energeticConsumption[3],
-		avgJoinLen[4],
-		energeticConsumption[4],
+		math.Round(avgJoinLen[0]*100) / 100,
+		math.Round(energeticConsumption[0]*100) / 100,
+		math.Round(avgJoinLen[1]*100) / 100,
+		math.Round(energeticConsumption[1]*100) / 100,
+		math.Round(avgJoinLen[2]*100) / 100,
+		math.Round(energeticConsumption[2]*100) / 100,
+		math.Round(avgJoinLen[3]*100) / 100,
+		math.Round(energeticConsumption[3]*100) / 100,
+		math.Round(avgJoinLen[4]*100) / 100,
+		math.Round(energeticConsumption[4]*100) / 100,
 	}
 
 	t, err := template.ParseFiles("../../templates/result_table")
